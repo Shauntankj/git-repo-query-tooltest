@@ -1,0 +1,13 @@
+# CODEOWNERS file for required reviewers
+# This file defines code owners who must review and approve changes
+# Learn more: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owners for everything in the repo
+# These users will be requested for review when someone opens a pull request
+* @Shauntankj
+
+# You can also specify different owners for different file types or directories
+# Examples:
+# *.js @javascript-team
+# /docs/ @documentation-team
+# *.py @python-developers
