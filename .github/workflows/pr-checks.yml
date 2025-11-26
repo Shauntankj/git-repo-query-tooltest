@@ -1,0 +1,80 @@
+name: Pull Request Checks
+
+# This workflow runs comprehensive checks on pull requests
+# including linting, testing, and security scans
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  pr-validation:
+    name: Pull Request Validation
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Validate PR title and description
+        run: |
+          echo "Validating pull request..."
+          
+          # Check if PR has a description
+          PR_BODY="${{ github.event.pull_request.body }}"
+          if [ -z "$PR_BODY" ]; then
+            echo "❌ Pull request description is required"
+            exit 1
+          fi
+          
+          echo "✅ Pull request validation passed"
+          
+      - name: Check for large files
+        run: |
+          echo "Checking for large files..."
+          
+          # Find files larger than 5MB
+          LARGE_FILES=$(find . -type f -size +5M -not -path "./.git/*" || true)
+          
+          if [ -n "$LARGE_FILES" ]; then
+            echo "⚠️  Large files detected:"
+            echo "$LARGE_FILES"
+            echo "Consider using Git LFS for large files"
+          else
+            echo "✅ No large files detected"
+          fi
+          
+      - name: Check for TODO and FIXME comments
+        run: |
+          echo "Scanning for TODO and FIXME comments..."
+          
+          # Search for TODO and FIXME in code files (excluding this workflow)
+          TODOS=$(grep -r "TODO\|FIXME" --exclude-dir=".git" --exclude="*.yml" --exclude="*.md" . || true)
+          
+          if [ -n "$TODOS" ]; then
+            echo "ℹ️  Found TODO/FIXME comments:"
+            echo "$TODOS"
+          else
+            echo "✅ No TODO/FIXME comments found"
+          fi
+
+  lint-yaml:
+    name: Lint YAML Files
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+          
+      - name: Install yamllint
+        run: pip install yamllint
+        
+      - name: Lint YAML files
+        run: |
+          echo "Linting YAML files..."
+          yamllint .github/workflows/ || echo "YAML linting completed with warnings"

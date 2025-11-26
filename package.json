@@ -1,0 +1,26 @@
+{
+  "name": "git-repo-query-tooltest",
+  "version": "1.0.0",
+  "description": "Demonstration repository for GitHub security and branch protection settings",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"No tests specified yet\" && exit 0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Shauntankj/git-repo-query-tooltest.git"
+  },
+  "keywords": [
+    "github",
+    "security",
+    "branch-protection",
+    "commit-signing",
+    "secret-scanning"
+  ],
+  "author": "Shauntankj",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Shauntankj/git-repo-query-tooltest/issues"
+  },
+  "homepage": "https://github.com/Shauntankj/git-repo-query-tooltest#readme"
+}

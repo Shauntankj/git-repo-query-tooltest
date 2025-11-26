@@ -1,0 +1,64 @@
+name: Commit Signature Verification
+
+# This workflow enforces commit signing requirements
+# It verifies that all commits in a pull request are signed
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  verify-signatures:
+    name: Verify Commit Signatures
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: Verify commit signatures
+        run: |
+          echo "Checking commit signatures..."
+          
+          # Get the list of commits in this push or PR
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            # For pull requests, check all commits in the PR
+            COMMITS=$(git rev-list ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }})
+          else
+            # For direct pushes, check the pushed commits
+            COMMITS=$(git rev-list ${{ github.event.before }}..${{ github.event.after }})
+          fi
+          
+          # Track if we found any unsigned commits
+          UNSIGNED_COMMITS=0
+          
+          # Check each commit
+          for commit in $COMMITS; do
+            # Get commit signature verification status
+            SIGNATURE_STATUS=$(git verify-commit $commit 2>&1 || echo "not-signed")
+            
+            if echo "$SIGNATURE_STATUS" | grep -q "Good signature\|valid signature"; then
+              echo "✓ Commit $commit is signed"
+            else
+              echo "✗ Commit $commit is NOT signed"
+              UNSIGNED_COMMITS=$((UNSIGNED_COMMITS + 1))
+            fi
+          done
+          
+          # Fail if unsigned commits found
+          if [ $UNSIGNED_COMMITS -gt 0 ]; then
+            echo ""
+            echo "❌ Found $UNSIGNED_COMMITS unsigned commit(s)"
+            echo "All commits must be signed with GPG or SSH keys"
+            echo "Learn more: https://docs.github.com/en/authentication/managing-commit-signature-verification/signing-commits"
+            exit 1
+          else
+            echo ""
+            echo "✅ All commits are properly signed"
+          fi

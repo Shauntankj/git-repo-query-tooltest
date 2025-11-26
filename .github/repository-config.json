@@ -1,0 +1,63 @@
+{
+  "repository": {
+    "name": "git-repo-query-tooltest",
+    "owner": "Shauntankj"
+  },
+  "branch_protection": {
+    "branch": "main",
+    "settings": {
+      "required_pull_request_reviews": {
+        "required_approving_review_count": 1,
+        "dismiss_stale_reviews": true,
+        "require_code_owner_reviews": true,
+        "require_last_push_approval": false
+      },
+      "required_status_checks": {
+        "strict": true,
+        "contexts": [
+          "Verify Commit Signatures",
+          "Scan for Secrets",
+          "Pull Request Validation",
+          "Lint YAML Files"
+        ]
+      },
+      "enforce_admins": true,
+      "required_linear_history": true,
+      "allow_force_pushes": false,
+      "allow_deletions": false,
+      "required_signatures": true,
+      "lock_branch": false,
+      "allow_fork_syncing": true
+    }
+  },
+  "security_settings": {
+    "secret_scanning": {
+      "enabled": true,
+      "push_protection": true
+    },
+    "dependency_scanning": {
+      "dependabot_alerts": true,
+      "dependabot_security_updates": true,
+      "dependency_graph": true
+    },
+    "code_scanning": {
+      "enabled": true,
+      "default_setup": true
+    },
+    "private_vulnerability_reporting": {
+      "enabled": true
+    }
+  },
+  "merge_settings": {
+    "allow_merge_commit": true,
+    "allow_squash_merge": true,
+    "allow_rebase_merge": true,
+    "allow_auto_merge": true,
+    "delete_branch_on_merge": true,
+    "allow_update_branch": true,
+    "squash_merge_commit_title": "PR_TITLE",
+    "squash_merge_commit_message": "PR_BODY",
+    "merge_commit_title": "PR_TITLE",
+    "merge_commit_message": "PR_BODY"
+  }
+}
