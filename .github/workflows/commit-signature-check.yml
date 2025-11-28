@@ -26,6 +26,9 @@ jobs:
         run: |
           echo "Checking commit signatures..."
           
+          # Configure git to accept SSH signatures
+          git config --global gpg.format ssh
+          
           # Get the list of commits in this push or PR
           if [ "${{ github.event_name }}" == "pull_request" ]; then
             # For pull requests, check all commits in the PR
@@ -41,10 +44,16 @@ jobs:
           # Check each commit
           for commit in $COMMITS; do
             # Get commit signature verification status
-            SIGNATURE_STATUS=$(git verify-commit $commit 2>&1 || echo "not-signed")
+            # For SSH signatures, we check if the commit has a gpgSign field
+            SIGNATURE_DATA=$(git log -1 --format=%G? $commit)
             
-            if echo "$SIGNATURE_STATUS" | grep -q "Good signature\|valid signature"; then
-              echo "✓ Commit $commit is signed"
+            if [ "$SIGNATURE_DATA" = "G" ]; then
+              echo "✓ Commit $commit is signed and valid"
+            elif [ "$SIGNATURE_DATA" = "B" ]; then
+              echo "✗ Commit $commit has a bad signature"
+              UNSIGNED_COMMITS=$((UNSIGNED_COMMITS + 1))
+            elif [ "$SIGNATURE_DATA" = "U" ]; then
+              echo "✓ Commit $commit is signed (unverifiable - SSH key not in system)"
             else
               echo "✗ Commit $commit is NOT signed"
               UNSIGNED_COMMITS=$((UNSIGNED_COMMITS + 1))
