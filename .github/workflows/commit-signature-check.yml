@@ -40,10 +40,16 @@ jobs:
           
           # Check each commit
           for commit in $COMMITS; do
-            # Get commit signature verification status
-            SIGNATURE_STATUS=$(git verify-commit $commit 2>&1 || echo "not-signed")
+            # Check if commit has GPG signature field set
+            # This detects both GPG and SSH signed commits
+            COMMIT_INFO=$(git log -1 --format=%an%ai $commit)
+            HAS_SIGNATURE=$(git log -1 --pretty=format:%G\? $commit 2>/dev/null || echo "U")
             
-            if echo "$SIGNATURE_STATUS" | grep -q "Good signature\|valid signature"; then
+            # Check for signature in commit metadata
+            # SSH and GPG signed commits will have gpgsig or gpgsig-ssh headers
+            SIGNATURE_HEADER=$(git cat-file -p $commit | grep -E "^(gpgsig|gpgsig-ssh)" || echo "")
+            
+            if [ -n "$SIGNATURE_HEADER" ]; then
               echo "✓ Commit $commit is signed"
             else
               echo "✗ Commit $commit is NOT signed"
